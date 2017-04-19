@@ -1,8 +1,19 @@
 /*
- * OSM2MobSinkApp.cpp
+ * OpenStreetMap to MobSink convertion tool.
+ * Copyright (C) 2017 João Paulo Just Peixoto <just1982@gmail.com>
  *
- *  Created on: 18 de abr de 2017
- *      Author: just
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <OSM2MobSinkApp.h>
@@ -14,8 +25,8 @@
 
 using namespace std;
 
-// Multiplier for coordinates normalization (higher = less precision)
-#define MULT 100000
+// Default MobSink network size
+#define NET_WIDTH 800
 
 // Program initialization
 bool OSM2MobSinkApp::OnInit()
@@ -24,11 +35,14 @@ bool OSM2MobSinkApp::OnInit()
         return false;
 
     SetAppName(wxT("OpenStreetMap to MobSink converter"));
-    SetVendorName(wxT("NetMedia"));
+    SetVendorName(wxT("LARA"));
     wxLocale app_locale(wxLANGUAGE_ENGLISH_US);
 
     // Do the conversion
-    Convert(inputfile, outputfile);
+    if (Convert(inputfile, outputfile))
+    	wxPrintf(wxT("Convertion succesfull!\n"));
+    else
+    	wxPrintf(wxT("The input file could not be converted. Check if it is a valid OpenStreetMap XML file.\n"));
 
     return false;
 }
@@ -47,6 +61,8 @@ bool OSM2MobSinkApp::OnCmdLineParsed(wxCmdLineParser& parser)
     // Get command line arguments
     bool input = parser.Found(wxT("i"), &this->inputfile);
     bool output = parser.Found(wxT("o"), &this->outputfile);
+    parser.Found(wxT("nh"), &this->map_height);
+    parser.Found(wxT("nw"), &this->map_width);
 
     // Verify if everything is OK
     if (input && output)
@@ -58,7 +74,7 @@ bool OSM2MobSinkApp::OnCmdLineParsed(wxCmdLineParser& parser)
     else
     {
         // Some parameter is missing. Display an error message.
-        wxPrintf(wxT("If you want to use command line, you must set all parameters! Use -h option to get help.\n"));
+        wxPrintf(wxT("You must specify input and output files. Use -h argument to get help.\n"));
         return false;
     }
 
@@ -94,20 +110,43 @@ bool OSM2MobSinkApp::Convert(wxString input, wxString output)
 			maxlat = atof(child->GetAttribute(wxT("maxlat")));
 			minlon = atof(child->GetAttribute(wxT("minlon")));
 			maxlon = atof(child->GetAttribute(wxT("maxlon")));
+
+			// After reading the boundaries of the map, it's time to determine the MobSink network size
+		    // If no height or width were specified, calculate default values
+			this->map_width = this->map_width == 0 ? NET_WIDTH : this->map_width;
+
+			if (this->map_height == 0)
+			{
+				// Get ratio of map width over OSM width and set map height
+				float ratio = this->map_width / (maxlon - minlon);
+				this->map_height = ratio * (maxlat - minlat);
+			}
+
         }
         // Nodes
         else if (child->GetName() == wxT("node"))
         {
         	int id = atoi(child->GetAttribute(wxT("id")));
-        	float lat = atof(child->GetAttribute(wxT("lat"))) - minlat;
-        	float lon = atof(child->GetAttribute(wxT("lon"))) - minlon;
+        	float lat = atof(child->GetAttribute(wxT("lat")));
+        	float lon = atof(child->GetAttribute(wxT("lon")));
+
+        	// Discard this node if it is outside the boundaries of the exported map
+        	if ((lat < minlat) || (lat > maxlat) || (lon < minlon) || (lon > maxlon))
+        	{
+        		child = child->GetNext();
+        		continue;
+        	}
+
+        	// Normalize the coordinates
+        	lat -= minlat;
+        	lon -= minlon;
 
         	// Correct the vertical mirroring (in MobSink, the y coordinates starts from the top)
         	lat = (maxlat - minlat) - lat;
 
-        	// Apply the MULT
-        	lat *= MULT;
-        	lon *= MULT;
+        	// Make it proportional to MobSink network size
+        	lat = (this->map_height * lat) / (maxlat - minlat);
+        	lon = (this->map_width * lon) / (maxlon - minlon);
 
         	Point p(lon, lat);
         	nodes[id] = p;
@@ -116,28 +155,58 @@ bool OSM2MobSinkApp::Convert(wxString input, wxString output)
         else if (child->GetName() == wxT("way"))
         {
         	wxXmlNode *nodechild = child->GetChildren();
+        	vector<Path> way;
         	Point a, b;
+        	int id;
+        	bool insert_way = false;
 
         	// Get the first node
-        	if (nodechild && nodechild->GetName() == wxT("nd"))
+        	while (nodechild && nodechild->GetName() == wxT("nd"))
         	{
-        		a = nodes[atoi(nodechild->GetAttribute(wxT("ref")))];
+        		id = atoi(nodechild->GetAttribute(wxT("ref")));
+        		if (nodes.find(id) == nodes.end())
+        		{
+        			nodechild = nodechild->GetNext();
+        			continue;
+        		}
+
+        		a = nodes[id];
         		nodechild = nodechild->GetNext();
+        		break;
         	}
 
         	// Get the following nodes and create paths
         	while (nodechild)
         	{
+        		// Nodes
         		if (nodechild->GetName() == wxT("nd"))
         		{
-        			b = nodes[atoi(nodechild->GetAttribute(wxT("ref")))];
+        			id = atoi(nodechild->GetAttribute(wxT("ref")));
+            		if (nodes.find(id) == nodes.end())
+            		{
+            			nodechild = nodechild->GetNext();
+            			continue;
+            		}
+
+        			b = nodes[id];
         			Path p(a, b);
-        			paths.push_back(p);
+        			way.push_back(p);
         			a = b;
+        		}
+        		// Tags
+        		else if (nodechild->GetName() == wxT("tag"))
+        		{
+        			// Only insert a way if it is a highway (roads, streets, etc.)
+        			if (nodechild->GetAttribute(wxT("k")) == wxT("highway"))
+        				insert_way = true;
         		}
 
         		nodechild = nodechild->GetNext();
         	}
+
+        	// If this way is a highway, insert it
+        	if (insert_way)
+        		paths.insert(paths.end(), way.begin(), way.end());
         }
 
         child = child->GetNext();
@@ -147,6 +216,10 @@ bool OSM2MobSinkApp::Convert(wxString input, wxString output)
     // Now it's time to create the output file.
     wxXmlDocument outputdoc;
     root = new wxXmlNode(NULL, wxXML_ELEMENT_NODE, wxT("network"));
+
+    // Insert network size
+    root->AddAttribute(wxT("width"), wxString::Format(wxT("%ld"), this->map_width));
+    root->AddAttribute(wxT("height"), wxString::Format(wxT("%ld"), this->map_height));
 
     // Insert the paths in the root XML node
     for (unsigned int i = 0; i < paths.size(); i++)

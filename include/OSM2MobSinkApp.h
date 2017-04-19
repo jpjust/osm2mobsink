@@ -1,8 +1,19 @@
 /*
- * OSM2MobSinkApp.h
+ * OpenStreetMap to MobSink convertion tool.
+ * Copyright (C) 2017 João Paulo Just Peixoto <just1982@gmail.com>
  *
- *  Created on: 18 de abr de 2017
- *      Author: just
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef INCLUDE_OSM2MOBSINKAPP_H_
@@ -21,6 +32,8 @@ private:
 
 	wxString inputfile;
 	wxString outputfile;
+	long int map_width = 0;
+	long int map_height = 0;
 };
 
 // Command line arguments
@@ -30,8 +43,10 @@ static const wxCmdLineEntryDesc g_cmdLineDesc [] =
         wxCMD_LINE_SWITCH, ("h"), ("help"), ("displays help on the command line parameters"),
         wxCMD_LINE_VAL_NONE, wxCMD_LINE_OPTION_HELP
     },
-    { wxCMD_LINE_OPTION, ("i"), ("input"), ("load OSM XML data from input file") },
-    { wxCMD_LINE_OPTION, ("o"), ("output"), ("save MobSink XML network to output file") },
+    { wxCMD_LINE_OPTION, ("i"),  ("input"),  ("load OSM XML data from input file") },
+    { wxCMD_LINE_OPTION, ("o"),  ("output"), ("save MobSink XML network to output file") },
+	{ wxCMD_LINE_OPTION, ("nw"), ("width"),  ("set the default MobSink network width"), wxCMD_LINE_VAL_NUMBER },
+	{ wxCMD_LINE_OPTION, ("nh"), ("height"), ("set the default MobSink network height"), wxCMD_LINE_VAL_NUMBER },
 
     { wxCMD_LINE_NONE }
 };
