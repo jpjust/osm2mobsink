@@ -37,18 +37,16 @@ private:
 };
 
 // Command line arguments
-static const wxCmdLineEntryDesc g_cmdLineDesc [] =
+static const wxCmdLineEntryDesc g_cmdLineDesc[] =
 {
-    {
-        wxCMD_LINE_SWITCH, ("h"), ("help"), ("displays help on the command line parameters"),
-        wxCMD_LINE_VAL_NONE, wxCMD_LINE_OPTION_HELP
-    },
-    { wxCMD_LINE_OPTION, ("i"),  ("input"),  ("load OSM XML data from input file") },
-    { wxCMD_LINE_OPTION, ("o"),  ("output"), ("save MobSink XML network to output file") },
-	{ wxCMD_LINE_OPTION, ("nw"), ("width"),  ("set the default MobSink network width"), wxCMD_LINE_VAL_NUMBER },
+	{ wxCMD_LINE_SWITCH, ("h"),  ("help"),   ("displays help on the command line parameters"), wxCMD_LINE_VAL_NONE,	wxCMD_LINE_OPTION_HELP },
+
+	{ wxCMD_LINE_OPTION, ("i"),  ("input"),  ("load OSM XML data from input file") },
+	{ wxCMD_LINE_OPTION, ("o"),  ("output"), ("save MobSink XML network to output file") },
+	{ wxCMD_LINE_OPTION, ("nw"), ("width"),	 ("set the default MobSink network width"), wxCMD_LINE_VAL_NUMBER },
 	{ wxCMD_LINE_OPTION, ("nh"), ("height"), ("set the default MobSink network height"), wxCMD_LINE_VAL_NUMBER },
 
-    { wxCMD_LINE_NONE }
+	{ wxCMD_LINE_NONE }
 };
 
 IMPLEMENT_APP(OSM2MobSinkApp)
