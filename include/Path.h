@@ -1,6 +1,6 @@
 /*
  * Path class declarations.
- * Copyright (C) 2014-2015 João Paulo Just Peixoto <just1982@gmail.com>.
+ * Copyright (C) 2015-2017 João Paulo Just Peixoto <just1982@gmail.com>.
  *
  * This file is part of MobSink.
  *
@@ -22,30 +22,61 @@
 #define PATH_H
 
 #include "Point.h"
+#include <map>
+
+using namespace std;
+
+// Path flow
+enum pathflow
+{
+	PATHFLOW_AB,	// Flow from point A to B
+	PATHFLOW_BA,	// Flow from point B to A
+	PATHFLOW_BI,	// Bi-directional flow
+};
+
+// Struct to define control parameters
+struct path_control_params
+{
+    int weight;
+    bool blocked;
+};
 
 // This class represents a path for the sinks
 class Path
 {
 public:
-    Path();
-    Path(Point a, Point b);
-    Path(float xa, float ya, float xb, float yb);
+    Path(int flow = PATHFLOW_BI);
+    Path(Point a, Point b, int flow = PATHFLOW_BI);
+    Path(float xa, float ya, float xb, float yb, int flow = PATHFLOW_BI);
+    void Reset(void);
 
     Point GetPointA(void);
     Point GetPointB(void);
+    int GetFlow(void);
 
     void SetPointA(Point a);
     void SetPointB(Point b);
+    void SetFlow(int flow);
 
     float GetLenght(void);
     bool HasPoint(Point p);
     Point GetProjection(Point p);
     Point GetNearestPoint(Point p);
     Point GetIntersection(Path r, bool &exist);
+    void InsertControl(int time, int weight, bool blocked);
+    map<int, struct path_control_params> *GetPathControl(void);
 
 private:
+    void ResetControlParams(void);
+
     Point a;
     Point b;
+    int flow;
+    //int weight;
+    //bool blocked;
+    struct path_control_params params_init;
+    map<int, struct path_control_params> path_control;    // Key: time in seconds
+
 };
 
 #endif // PATH_H

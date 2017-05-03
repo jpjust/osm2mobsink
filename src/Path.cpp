@@ -1,6 +1,6 @@
 /*
  * Path class implementation.
- * Copyright (C) 2014-2015 João Paulo Just Peixoto <just1982@gmail.com>.
+ * Copyright (C) 2015-2017 João Paulo Just Peixoto <just1982@gmail.com>.
  *
  * This file is part of MobSink.
  *
@@ -22,23 +22,28 @@
 #include <math.h>
 
 // Constructors
-Path::Path()
+Path::Path(int flow)
 {
-    // Do nothing
+	ResetControlParams();
+	SetFlow(flow);
 }
 
-Path::Path(Point a, Point b)
+Path::Path(Point a, Point b, int flow)
 {
+	ResetControlParams();
     SetPointA(a);
     SetPointB(b);
+	SetFlow(flow);
 }
 
-Path::Path(float xa, float ya, float xb, float yb)
+Path::Path(float xa, float ya, float xb, float yb, int flow)
 {
+	ResetControlParams();
     Point a(xa, ya);
     Point b(xb, yb);
     SetPointA(a);
     SetPointB(b);
+	SetFlow(flow);
 }
 
 // Getters and setters
@@ -52,6 +57,11 @@ Point Path::GetPointB(void)
     return this->b;
 }
 
+int Path::GetFlow(void)
+{
+	return this->flow;
+}
+
 void Path::SetPointA(Point a)
 {
     this->a = a;
@@ -60,6 +70,11 @@ void Path::SetPointA(Point a)
 void Path::SetPointB(Point b)
 {
     this->b = b;
+}
+
+void Path::SetFlow(int flow)
+{
+	this->flow = flow;
 }
 
 // Return the lenght of this path
@@ -191,4 +206,25 @@ Point Path::GetIntersection(Path r, bool &exist)
 
     exist = (HasPoint(p) && r.HasPoint(p));
     return p;
+}
+
+// Reset control parameters
+void Path::ResetControlParams(void)
+{
+	InsertControl(0, 1, false);
+}
+
+// Insert control settings at a specific time
+void Path::InsertControl(int time, int weight, bool blocked)
+{
+    struct path_control_params p;
+    p.weight = weight;
+    p.blocked = blocked;
+    this->path_control.insert(pair<int, struct path_control_params>(time, p));
+}
+
+// Return a pointer to this path's path control
+map<int, struct path_control_params> *Path::GetPathControl(void)
+{
+	return &(this->path_control);
 }

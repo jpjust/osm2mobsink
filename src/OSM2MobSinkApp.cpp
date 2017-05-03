@@ -160,6 +160,7 @@ bool OSM2MobSinkApp::Convert(wxString input, wxString output)
 			Point a, b;
 			int id;
 			bool insert_way = false;
+			pathflow flow = PATHFLOW_BI;
 
 			// Get the first node
 			while (nodechild && nodechild->GetName() == wxT("nd"))
@@ -200,6 +201,10 @@ bool OSM2MobSinkApp::Convert(wxString input, wxString output)
 					// Only insert a way if it is a highway (roads, streets, etc.)
 					if (nodechild->GetAttribute(wxT("k")) == wxT("highway"))
 						insert_way = true;
+
+					// Is this an one-way road?
+					if ((nodechild->GetAttribute(wxT("k")) == wxT("oneway")) && (nodechild->GetAttribute(wxT("v")) == wxT("yes")))
+						flow = PATHFLOW_AB;
 				}
 
 				nodechild = nodechild->GetNext();
@@ -207,7 +212,14 @@ bool OSM2MobSinkApp::Convert(wxString input, wxString output)
 
 			// If this way is a highway, insert it
 			if (insert_way)
+			{
+				// If it is an one-way road, set its attribute
+				if (flow == PATHFLOW_AB)
+					for (unsigned int i = 0; i < paths.size(); i++)
+						paths.at(i).SetFlow(flow);
+
 				paths.insert(paths.end(), way.begin(), way.end());
+			}
 		}
 
 		child = child->GetNext();
@@ -232,6 +244,8 @@ bool OSM2MobSinkApp::Convert(wxString input, wxString output)
 		newnode->AddAttribute(wxT("ya"), wxString::Format(wxT("%f"), paths.at(i).GetPointA().GetY()));
 		newnode->AddAttribute(wxT("xb"), wxString::Format(wxT("%f"), paths.at(i).GetPointB().GetX()));
 		newnode->AddAttribute(wxT("yb"), wxString::Format(wxT("%f"), paths.at(i).GetPointB().GetY()));
+		if (paths.at(i).GetFlow() == PATHFLOW_AB)
+			newnode->AddAttribute(wxT("flow"), wxT("ab"));
 	}
 
 	outputdoc.SetRoot(root);
