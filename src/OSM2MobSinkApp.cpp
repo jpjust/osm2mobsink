@@ -1,5 +1,5 @@
 /*
- * OpenStreetMap to MobSink convertion tool.
+ * OpenStreetMap to MobSink conversion tool.
  * Copyright (C) 2017 João Paulo Just Peixoto <just1982@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,9 +17,9 @@
  */
 
 #include <OSM2MobSinkApp.h>
+#include <Path.h>
+#include <Point.h>
 #include <wx/xml/xml.h>
-#include "Point.h"
-#include "Path.h"
 #include <map>
 #include <vector>
 
@@ -40,7 +40,7 @@ bool OSM2MobSinkApp::OnInit()
 
 	// Do the conversion
 	if (Convert(inputfile, outputfile))
-		wxPrintf(wxT("Convertion succesfull!\n"));
+		wxPrintf(wxT("Conversion successful!\n"));
 	else
 		wxPrintf(wxT("The input file could not be converted. Check if it is a valid OpenStreetMap XML file.\n"));
 
@@ -161,6 +161,7 @@ bool OSM2MobSinkApp::Convert(wxString input, wxString output)
 			int id;
 			bool insert_way = false;
 			pathflow flow = PATHFLOW_BI;
+			float speedlimit = 0;
 
 			// Get the first node
 			while (nodechild && nodechild->GetName() == wxT("nd"))
@@ -205,6 +206,10 @@ bool OSM2MobSinkApp::Convert(wxString input, wxString output)
 					// Is this an one-way road?
 					if ((nodechild->GetAttribute(wxT("k")) == wxT("oneway")) && (nodechild->GetAttribute(wxT("v")) == wxT("yes")))
 						flow = PATHFLOW_AB;
+
+					// Does it have a speed limit?
+					if (nodechild->GetAttribute(wxT("k")) == wxT("maxspeed"))
+						speedlimit = atof(nodechild->GetAttribute(wxT("v")));
 				}
 
 				nodechild = nodechild->GetNext();
@@ -216,7 +221,11 @@ bool OSM2MobSinkApp::Convert(wxString input, wxString output)
 				// If it is an one-way road, set its attribute
 				if (flow == PATHFLOW_AB)
 					for (unsigned int i = 0; i < paths.size(); i++)
+					{
 						paths.at(i).SetFlow(flow);
+						if (speedlimit > 0)
+							paths.at(i).InsertControl(1, speedlimit, 1, false);
+					}
 
 				paths.insert(paths.end(), way.begin(), way.end());
 			}
@@ -237,8 +246,7 @@ bool OSM2MobSinkApp::Convert(wxString input, wxString output)
 	// Insert the paths in the root XML node
 	for (unsigned int i = 0; i < paths.size(); i++)
 	{
-		wxXmlNode *newnode = new wxXmlNode(root, wxXML_ELEMENT_NODE,
-				wxT("path"));
+		wxXmlNode *newnode = new wxXmlNode(root, wxXML_ELEMENT_NODE, wxT("path"));
 
 		newnode->AddAttribute(wxT("xa"), wxString::Format(wxT("%f"), paths.at(i).GetPointA().GetX()));
 		newnode->AddAttribute(wxT("ya"), wxString::Format(wxT("%f"), paths.at(i).GetPointA().GetY()));
@@ -246,6 +254,15 @@ bool OSM2MobSinkApp::Convert(wxString input, wxString output)
 		newnode->AddAttribute(wxT("yb"), wxString::Format(wxT("%f"), paths.at(i).GetPointB().GetY()));
 		if (paths.at(i).GetFlow() == PATHFLOW_AB)
 			newnode->AddAttribute(wxT("flow"), wxT("ab"));
+
+		// Set the speed limit if any
+		if (paths.at(i).GetPathControl()->find(1) != paths.at(i).GetPathControl()->end())
+		{
+			wxXmlNode *traffic = new wxXmlNode(newnode, wxXML_ELEMENT_NODE, wxT("traffic"));
+			traffic->AddAttribute(wxT("time"), wxT("0"));
+			traffic->AddAttribute(wxT("speedlimit"), wxString::Format(wxT("%f"), paths.at(i).GetPathControl()->at(1).speedlimit));
+			traffic->AddAttribute(wxT("traffic"), wxT("1"));
+		}
 	}
 
 	outputdoc.SetRoot(root);

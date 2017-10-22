@@ -37,7 +37,8 @@ enum pathflow
 // Struct to define control parameters
 struct path_control_params
 {
-    int weight;
+	float speedlimit;
+    float traffic;
     bool blocked;
 };
 
@@ -45,25 +46,25 @@ struct path_control_params
 class Path
 {
 public:
-    Path(int flow = PATHFLOW_BI);
-    Path(Point a, Point b, int flow = PATHFLOW_BI);
-    Path(float xa, float ya, float xb, float yb, int flow = PATHFLOW_BI);
+    Path(pathflow flow = PATHFLOW_BI);
+    Path(Point a, Point b, pathflow flow = PATHFLOW_BI);
+    Path(float xa, float ya, float xb, float yb, pathflow flow = PATHFLOW_BI);
     void Reset(void);
 
     Point GetPointA(void);
     Point GetPointB(void);
-    int GetFlow(void);
+    pathflow GetFlow(void);
 
     void SetPointA(Point a);
     void SetPointB(Point b);
-    void SetFlow(int flow);
+    void SetFlow(pathflow flow);
 
     float GetLenght(void);
     bool HasPoint(Point p);
     Point GetProjection(Point p);
     Point GetNearestPoint(Point p);
     Point GetIntersection(Path r, bool &exist);
-    void InsertControl(int time, int weight, bool blocked);
+    void InsertControl(int time, float speedlimit, float traffic, bool blocked);
     map<int, struct path_control_params> *GetPathControl(void);
 
 private:
@@ -71,9 +72,7 @@ private:
 
     Point a;
     Point b;
-    int flow;
-    //int weight;
-    //bool blocked;
+    pathflow flow;
     struct path_control_params params_init;
     map<int, struct path_control_params> path_control;    // Key: time in seconds
 

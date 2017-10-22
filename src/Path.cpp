@@ -22,13 +22,13 @@
 #include <math.h>
 
 // Constructors
-Path::Path(int flow)
+Path::Path(pathflow flow)
 {
 	ResetControlParams();
 	SetFlow(flow);
 }
 
-Path::Path(Point a, Point b, int flow)
+Path::Path(Point a, Point b, pathflow flow)
 {
 	ResetControlParams();
     SetPointA(a);
@@ -36,7 +36,7 @@ Path::Path(Point a, Point b, int flow)
 	SetFlow(flow);
 }
 
-Path::Path(float xa, float ya, float xb, float yb, int flow)
+Path::Path(float xa, float ya, float xb, float yb, pathflow flow)
 {
 	ResetControlParams();
     Point a(xa, ya);
@@ -57,7 +57,7 @@ Point Path::GetPointB(void)
     return this->b;
 }
 
-int Path::GetFlow(void)
+pathflow Path::GetFlow(void)
 {
 	return this->flow;
 }
@@ -72,7 +72,7 @@ void Path::SetPointB(Point b)
     this->b = b;
 }
 
-void Path::SetFlow(int flow)
+void Path::SetFlow(pathflow flow)
 {
 	this->flow = flow;
 }
@@ -211,14 +211,15 @@ Point Path::GetIntersection(Path r, bool &exist)
 // Reset control parameters
 void Path::ResetControlParams(void)
 {
-	InsertControl(0, 1, false);
+	InsertControl(0, 0, 1, false);
 }
 
 // Insert control settings at a specific time
-void Path::InsertControl(int time, int weight, bool blocked)
+void Path::InsertControl(int time, float speedlimit, float traffic, bool blocked)
 {
     struct path_control_params p;
-    p.weight = weight;
+    p.traffic = traffic;
+    p.speedlimit = speedlimit;
     p.blocked = blocked;
     this->path_control.insert(pair<int, struct path_control_params>(time, p));
 }

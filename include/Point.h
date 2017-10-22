@@ -1,6 +1,6 @@
 /*
  * Point class declarations.
- * Copyright (C) 2014-2015 João Paulo Just Peixoto <just1982@gmail.com>.
+ * Copyright (C) 2015-2016 João Paulo Just Peixoto <just1982@gmail.com>.
  *
  * This file is part of MobSink.
  *
