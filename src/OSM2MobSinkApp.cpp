@@ -63,6 +63,7 @@ bool OSM2MobSinkApp::OnCmdLineParsed(wxCmdLineParser& parser)
 	bool output = parser.Found(wxT("o"), &this->outputfile);
 	parser.Found(wxT("nh"), &this->map_height);
 	parser.Found(wxT("nw"), &this->map_width);
+	parser.Found(wxT("s"), &this->defaultspeed);
 
 	// Verify if everything is OK
 	if (input && output)
@@ -97,7 +98,7 @@ bool OSM2MobSinkApp::Convert(wxString input, wxString output)
 	// Prepare some structures
 	map<int, Point> nodes;
 	vector<Path> paths;
-	float minlat, maxlat, minlon, maxlon;
+	float minlat = 0, maxlat = 0, minlon = 0, maxlon = 0;
 
 	// Read map data
 	wxXmlNode *child = root->GetChildren();
@@ -242,6 +243,7 @@ bool OSM2MobSinkApp::Convert(wxString input, wxString output)
 	// Insert network size
 	root->AddAttribute(wxT("width"), wxString::Format(wxT("%ld"), this->map_width));
 	root->AddAttribute(wxT("height"), wxString::Format(wxT("%ld"), this->map_height));
+	root->AddAttribute(wxT("speedlimit"), wxString::Format(wxT("%ld"), this->defaultspeed));
 
 	// Insert the paths in the root XML node
 	for (unsigned int i = 0; i < paths.size(); i++)
@@ -259,7 +261,7 @@ bool OSM2MobSinkApp::Convert(wxString input, wxString output)
 		if (paths.at(i).GetPathControl()->find(1) != paths.at(i).GetPathControl()->end())
 		{
 			wxXmlNode *traffic = new wxXmlNode(newnode, wxXML_ELEMENT_NODE, wxT("traffic"));
-			traffic->AddAttribute(wxT("time"), wxT("0"));
+			traffic->AddAttribute(wxT("time"), wxT("1"));
 			traffic->AddAttribute(wxT("speedlimit"), wxString::Format(wxT("%f"), paths.at(i).GetPathControl()->at(1).speedlimit));
 			traffic->AddAttribute(wxT("traffic"), wxT("1"));
 		}

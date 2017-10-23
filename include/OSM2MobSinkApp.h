@@ -19,6 +19,8 @@
 #ifndef INCLUDE_OSM2MOBSINKAPP_H_
 #define INCLUDE_OSM2MOBSINKAPP_H_
 
+#define DEFAULT_SPEED 50
+
 #include <wx/wx.h>
 #include <wx/cmdline.h>
 
@@ -34,6 +36,7 @@ private:
 	wxString outputfile;
 	long int map_width = 0;
 	long int map_height = 0;
+	long int defaultspeed = DEFAULT_SPEED;
 };
 
 // Command line arguments
@@ -45,6 +48,7 @@ static const wxCmdLineEntryDesc g_cmdLineDesc[] =
 	{ wxCMD_LINE_OPTION, ("o"),  ("output"), ("save MobSink XML network to output file") },
 	{ wxCMD_LINE_OPTION, ("nw"), ("width"),	 ("set the default MobSink network width"), wxCMD_LINE_VAL_NUMBER },
 	{ wxCMD_LINE_OPTION, ("nh"), ("height"), ("set the default MobSink network height"), wxCMD_LINE_VAL_NUMBER },
+	{ wxCMD_LINE_OPTION, ("s"),  ("speed"),  ("set the default MobSink network speed limit (default: 50)"), wxCMD_LINE_VAL_NUMBER },
 
 	{ wxCMD_LINE_NONE }
 };
