@@ -22,6 +22,7 @@
 #define PATH_H
 
 #include "Point.h"
+#include <wx/string.h>
 #include <map>
 
 using namespace std;
@@ -54,10 +55,12 @@ public:
     Point GetPointA(void);
     Point GetPointB(void);
     pathflow GetFlow(void);
+    wxString GetName(void);
 
     void SetPointA(Point a);
     void SetPointB(Point b);
     void SetFlow(pathflow flow);
+    void SetName(wxString name);
 
     float GetLenght(void);
     bool HasPoint(Point p);
@@ -75,7 +78,7 @@ private:
     pathflow flow;
     struct path_control_params params_init;
     map<int, struct path_control_params> path_control;    // Key: time in seconds
-
+    wxString name;
 };
 
 #endif // PATH_H

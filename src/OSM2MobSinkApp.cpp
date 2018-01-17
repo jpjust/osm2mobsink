@@ -163,6 +163,7 @@ bool OSM2MobSinkApp::Convert(wxString input, wxString output)
 			bool insert_way = false;
 			pathflow flow = PATHFLOW_BI;
 			float speedlimit = 0;
+			wxString name = wxEmptyString;
 
 			// Get the first node
 			while (nodechild && nodechild->GetName() == wxT("nd"))
@@ -211,6 +212,10 @@ bool OSM2MobSinkApp::Convert(wxString input, wxString output)
 					// Does it have a speed limit?
 					if (nodechild->GetAttribute(wxT("k")) == wxT("maxspeed"))
 						speedlimit = atof(nodechild->GetAttribute(wxT("v")));
+
+					// Does it have a name?
+					if (nodechild->GetAttribute(wxT("k")) == wxT("name"))
+						name = nodechild->GetAttribute(wxT("v"));
 				}
 
 				nodechild = nodechild->GetNext();
@@ -219,14 +224,18 @@ bool OSM2MobSinkApp::Convert(wxString input, wxString output)
 			// If this way is a highway, insert it
 			if (insert_way)
 			{
-				// If it is an one-way road, set its attribute
-				if (flow == PATHFLOW_AB)
-					for (unsigned int i = 0; i < paths.size(); i++)
-					{
-						paths.at(i).SetFlow(flow);
-						if (speedlimit > 0)
-							paths.at(i).InsertControl(1, speedlimit, 1, false);
-					}
+				for (unsigned int i = 0; i < way.size(); i++)
+				{
+					way.at(i).SetName(name);
+
+					// If it is an one-way road, set its attribute
+					if (flow == PATHFLOW_AB)
+						way.at(i).SetFlow(flow);
+
+					// Set its speed limit
+					if (speedlimit > 0)
+						way.at(i).InsertControl(1, speedlimit, 1, false);
+				}
 
 				paths.insert(paths.end(), way.begin(), way.end());
 			}
@@ -250,6 +259,7 @@ bool OSM2MobSinkApp::Convert(wxString input, wxString output)
 	{
 		wxXmlNode *newnode = new wxXmlNode(root, wxXML_ELEMENT_NODE, wxT("path"));
 
+		newnode->AddAttribute(wxT("name"), paths.at(i).GetName());
 		newnode->AddAttribute(wxT("xa"), wxString::Format(wxT("%f"), paths.at(i).GetPointA().GetX()));
 		newnode->AddAttribute(wxT("ya"), wxString::Format(wxT("%f"), paths.at(i).GetPointA().GetY()));
 		newnode->AddAttribute(wxT("xb"), wxString::Format(wxT("%f"), paths.at(i).GetPointB().GetX()));

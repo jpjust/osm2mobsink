@@ -62,6 +62,11 @@ pathflow Path::GetFlow(void)
 	return this->flow;
 }
 
+wxString Path::GetName(void)
+{
+	return this->name;
+}
+
 void Path::SetPointA(Point a)
 {
     this->a = a;
@@ -77,7 +82,12 @@ void Path::SetFlow(pathflow flow)
 	this->flow = flow;
 }
 
-// Return the lenght of this path
+void Path::SetName(wxString name)
+{
+	this->name = name;
+}
+
+// Return the length of this path
 float Path::GetLenght(void)
 {
     return a.Distance(b);
