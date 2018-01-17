@@ -50,13 +50,8 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/mobsink/Debug/src}&quot;"/>
 								</option>
 								<option id="gnu.cpp.link.option.libs.672668804" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" useByScannerDiscovery="false" valueType="libs">
-									<listOptionValue builtIn="false" value="wx_baseu-3.0"/>
-									<listOptionValue builtIn="false" value="wx_gtk2u_xrc-3.0"/>
-									<listOptionValue builtIn="false" value="wx_gtk2u_html-3.0"/>
-									<listOptionValue builtIn="false" value="wx_gtk2u_qa-3.0"/>
-									<listOptionValue builtIn="false" value="wx_gtk2u_adv-3.0"/>
 									<listOptionValue builtIn="false" value="wx_gtk2u_core-3.0"/>
-									<listOptionValue builtIn="false" value="wx_baseu_net-3.0"/>
+									<listOptionValue builtIn="false" value="wx_baseu-3.0"/>
 									<listOptionValue builtIn="false" value="wx_baseu_xml-3.0"/>
 								</option>
 								<option id="gnu.cpp.link.option.flags.1770381060" name="Linker flags" superClass="gnu.cpp.link.option.flags" useByScannerDiscovery="false" value="-pthread" valueType="string"/>
@@ -122,20 +117,15 @@
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.linker.exe.release.1167421686" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.release"/>
 							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.release.1921290796" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.release">
-								<option id="gnu.cpp.link.option.paths.46937110" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
+								<option id="gnu.cpp.link.option.paths.46937110" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" useByScannerDiscovery="false" valueType="libPaths">
 									<listOptionValue builtIn="false" value="/usr/lib/x86_64-linux-gnu"/>
 								</option>
-								<option id="gnu.cpp.link.option.libs.1420532859" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
-									<listOptionValue builtIn="false" value="wx_baseu-3.0"/>
-									<listOptionValue builtIn="false" value="wx_gtk2u_xrc-3.0"/>
-									<listOptionValue builtIn="false" value="wx_gtk2u_html-3.0"/>
-									<listOptionValue builtIn="false" value="wx_gtk2u_qa-3.0"/>
-									<listOptionValue builtIn="false" value="wx_gtk2u_adv-3.0"/>
+								<option id="gnu.cpp.link.option.libs.1420532859" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" useByScannerDiscovery="false" valueType="libs">
 									<listOptionValue builtIn="false" value="wx_gtk2u_core-3.0"/>
-									<listOptionValue builtIn="false" value="wx_baseu_net-3.0"/>
+									<listOptionValue builtIn="false" value="wx_baseu-3.0"/>
 									<listOptionValue builtIn="false" value="wx_baseu_xml-3.0"/>
 								</option>
-								<option id="gnu.cpp.link.option.flags.700023660" name="Linker flags" superClass="gnu.cpp.link.option.flags" value="-pthread" valueType="string"/>
+								<option id="gnu.cpp.link.option.flags.700023660" name="Linker flags" superClass="gnu.cpp.link.option.flags" useByScannerDiscovery="false" value="-pthread" valueType="string"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.1281151840" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
