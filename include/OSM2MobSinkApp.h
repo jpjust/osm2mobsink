@@ -1,6 +1,6 @@
 /*
- * OpenStreetMap to MobSink convertion tool.
- * Copyright (C) 2017 João Paulo Just Peixoto <just1982@gmail.com>
+ * OpenStreetMap to MobSink conversion tool.
+ * Copyright (C) 2017 - 2018 João Paulo Just Peixoto <just1982@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,6 +31,7 @@ private:
 	virtual void OnInitCmdLine(wxCmdLineParser& parser);
 	virtual bool OnCmdLineParsed(wxCmdLineParser& parser);
 	bool Convert(wxString input, wxString output);
+	wxSize GetMapSize(float lat_a, float lon_a, float lat_b, float lon_b);
 
 	wxString inputfile;
 	wxString outputfile;
