@@ -1,6 +1,6 @@
 /*
  * OpenStreetMap to MobSink conversion tool.
- * Copyright (C) 2017 João Paulo Just Peixoto <just1982@gmail.com>
+ * Copyright (C) 2017-2018 João Paulo Just Peixoto <just1982@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,11 +22,9 @@
 #include <wx/xml/xml.h>
 #include <map>
 #include <vector>
+#include <math.h>
 
 using namespace std;
-
-// Default MobSink network size
-#define NET_WIDTH 800
 
 // Program initialization
 bool OSM2MobSinkApp::OnInit()
@@ -114,15 +112,11 @@ bool OSM2MobSinkApp::Convert(wxString input, wxString output)
 
 			// After reading the boundaries of the map, it's time to determine the MobSink network size
 			// If no height or width were specified, calculate default values
-			this->map_width =
-					this->map_width == 0 ? NET_WIDTH : this->map_width;
+			wxSize map_size = GetMapSize(minlat, minlon, maxlat, maxlon);
+			this->map_width = this->map_width == 0 ? map_size.x : this->map_width;
 
 			if (this->map_height == 0)
-			{
-				// Get ratio of map width over OSM width and set map height
-				float ratio = this->map_width / (maxlon - minlon);
-				this->map_height = ratio * (maxlat - minlat);
-			}
+				this->map_height = map_size.y;
 
 		}
 		// Nodes
@@ -281,4 +275,16 @@ bool OSM2MobSinkApp::Convert(wxString input, wxString output)
 	bool saved = outputdoc.Save(output);
 
 	return saved;
+}
+
+// Get map size in meters from latitude and longitude
+wxSize OSM2MobSinkApp::GetMapSize(float lat_a, float lon_a, float lat_b, float lon_b)
+{
+	float lat_avg = (lat_a + lat_b) / 2;
+	float lat_delta = fabsf(lat_b - lat_a);
+	float lon_delta = fabsf(lon_b - lon_a);
+	float lat_rad = lat_avg * (M_PI / 180);
+	float width = cosf(fabsf(lat_rad)) * lon_delta * 111320;
+	float height = lat_delta * 110574;
+	return wxSize(width, height);
 }
